@@ -1,0 +1,25 @@
+//EmployeeHelper Apex Class
+public class EmployeeHelper {
+    public static void afterInsert(Employee__c[] e){
+        
+    if(trigger.isInsert){
+        List<Employee__Share> empShr= new List<Employee__Share>();
+        Employee__Share mngShr;
+        Set<Id> ids= new Set<Id>();
+        for(Employee__c emp: e){
+            if(emp.Manager__c != NULL){
+                ids.add(emp.Manager__c);
+            }
+        }
+        Map<Id, Employee__c> managers= new Map<Id, Employee__c>([Select Id,SFDC_User__c From Employee__c Where Id in: ids]);
+        for(Employee__c emp: e){
+            mngShr= new Employee__Share();
+            mngShr.ParentId= emp.Id;
+            mngShr.UserorGroupId= managers.get(emp.Manager__c).SFDC_User__c;
+            mngShr.AccessLevel= 'read';
+            empShr.add(mngShr);
+        }
+    }
+
+    }
+}

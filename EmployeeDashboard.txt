@@ -1,0 +1,115 @@
+//Employee Dasshboard Visualforce Page
+<apex:page controller="LeaveController" docType="html-5.0">
+    <style>
+    
+    #intro{
+    font-style:normal;
+    color:#b30000;
+        font-size:20px;
+    }    
+    .divstyle{
+        height: 350px;
+        width: 250px;
+        border:2px solid #b30000;
+        border-radius:20px;
+        -moz-box-shadow:inset 0 0 10px #000000;
+        -webkit-box-shadow:inset 0 0 10px #000000;
+        box-shadow:inset 0 0 10px #000000;
+        padding-left:5px;
+        padding-right:5px;
+    }
+        #left{
+        float:left;
+        position:relative;
+        display:inline-block;
+        }
+        .input{
+        padding: 4px 10px;
+        display: inline-block;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    	box-sizing: border-box;
+        }
+        td{
+        padding-top:10px;
+        padding-bottom:10px;
+        }
+        #center{
+        display:inline-block;
+        float:center;
+        position:relative;
+        width:520px;
+        padding-left:20px;
+        padding-top:20px;
+        
+        }
+        #right{
+        display:inline-block;
+        float:right;
+        position:relative;
+        overflow:auto;
+        }
+        .txtformat{
+        text-align:center;
+        font-style:italic;
+        font-weight:bold;
+        }
+    </style>
+    <span id="header">
+        <p id="intro" class="txtformat">
+            Hello
+        </p>
+    </span>
+    <div id="container">
+        <div id="left" class="divstyle">
+            <p class="txtformat">
+                Apply For Leave
+            </p>
+            <apex:pageMessages id="showmsg"></apex:pageMessages>
+            <apex:form >
+                <table>
+                    <tr>
+                    	<td><label style="padding-top:5px">Start Date</label></td>
+                        <td><apex:input type="date" value="{!startDate}" required="true" styleClass="input" id="startDate"/></td>
+                    </tr>
+                    <tr>
+                    	<td><label style="padding-top:5px">End Date</label></td>
+                    	<td><apex:input type="date" value="{!endDate}" required="true" styleClass="input" id="endDate"/></td>
+                    </tr>
+                    <tr>
+                    	<td><label>Leave Type</label></td>
+                        <td><apex:selectList size="1" required="true" value="{!leaveType}" >
+          					<apex:selectOptions value="{!leaveList}" ></apex:selectOptions>
+      						</apex:selectList>
+                        </td>
+                    </tr>
+                </table>
+                <apex:commandButton value="Apply" action="{!applyForLeave}" style="margin-top:10px" reRender="showmsg">
+                    
+                </apex:commandButton>
+            </apex:form>
+        </div>
+        <div id="center" >
+            <apex:pageBlock >
+                <apex:pageBlockTable value="{!availableLeave}" var="leave">
+                    <apex:column value="{!leave.Name}"  />
+                    <apex:column value="{!leave.Leave_Count__c}" />
+                    <apex:column value="{!leave.Extra_Leave_Count__c}" />
+                    
+                </apex:pageBlockTable>
+            </apex:pageBlock>
+        </div>
+        <div id="right" class="divstyle">
+            <p class="txtformat">
+                List Of Holidays
+            </p>
+            <apex:pageBlock >
+            	<apex:pageBlockTable value="{!holidays}" var="h" >
+                	<apex:column value="{!h.Name}"/>
+                    <apex:column value="{!h.Holiday_Date__c}"/>
+                </apex:pageBlockTable>
+            </apex:pageBlock>
+        </div>
+    </div>	
+
+</apex:page>

@@ -1,0 +1,4 @@
+//Trigger on Employee custom object
+trigger Employee on Employee__c (after insert){
+    EmployeeHelper.afterInsert(Trigger.new);
+}

@@ -1,0 +1,78 @@
+//Leave Controller Apex Class
+public class LeaveController {
+    public Id id;
+    public List<Employee__c> emp;
+    public Date startDate{get;set;}
+    public Date endDate{get;set;}
+    public String leaveType{get;set;}
+    public Integer leaveDuration;
+    public Leave__c applyLeave{get;set;}
+    public LeaveController(){
+        id= System.UserInfo.getUserId();
+        emp= [Select Id,Name,(Select Id,Name,Leave_Count__c,Extra_Leave_Count__c From Available_Leaves__r),(Select Id,Start_Date__c,End_Date__c,Leave_Duration__c,Leave_Type__c From Leaves__r) From Employee__c Where SFDC_User__c=: id];
+        
+    }
+    
+    public void applyForLeave(){
+        //applyLeave= [Select Id,Name,Start_Date__c,End_Date__c,Leave_Duration__c,Leave_Type__c,Employee__c From Leave__c Where Employee__r.SFDC_User__r.Id=: id];
+        List<Holiday__c> holidays= [Select Name,Holiday_Date__c From Holiday__c];
+        Integer count= 0;
+        for(Holiday__c h: holidays){
+            if(startDate==h.Holiday_Date__c){
+                //Error Message
+                ApexPages.addmessage(new ApexPages.Message(ApexPages.Severity.ERROR  ,'Start Date of Leave Cannot Be Same As Holiday Date'));
+                return ;
+            }
+            if(endDate==h.Holiday_Date__c){
+                //Error Message
+                ApexPages.addmessage(new ApexPages.Message(ApexPages.Severity.ERROR  ,'End Date of Leave Cannot Be Same As Holiday Date'));
+                return;
+            }
+            if((h.Holiday_Date__c > startDate) && (h.Holiday_Date__c < endDate)){
+                count++;
+            }
+        }
+        applyLeave= new Leave__c();
+        for(Employee__c e: emp){
+            applyLeave.Employee__c= e.Id;
+        }
+        applyLeave.Start_Date__c= startDate;
+        applyLeave.End_Date__c= endDate;
+        applyLeave.Leave_Type__c= leaveType;
+        
+        insert applyLeave;
+        leaveDuration= startDate.daysBetween(endDate) - count;
+        List<Available_Leave__c> remLeave;
+        for(Employee__c e:emp){
+            remLeave= e.Available_Leaves__r;
+            
+        }
+        for(Available_Leave__c al: remLeave){
+            if(al.Name == leaveType){
+                al.Leave_Count__c= (al.Leave_Count__c - leaveDuration);
+            update al;
+            }
+        }
+        //remLeave.Name= leaveType;
+        
+    }
+    public List<Available_Leave__c> getAvailableLeave(){
+        List<Available_Leave__c> avlLeave;
+        for(Employee__c e: emp){
+            avlLeave= e.Available_Leaves__r;
+        }
+        return avlLeave;
+    }
+    public List<SelectOption> getLeaveList(){
+        List<SelectOption> options= new List<SelectOption>();
+        options.add(new SelectOption('Sick Leave','Sick Leave'));
+        options.add(new SelectOption('Casual Leave','Casual Leave'));
+        options.add(new SelectOption('Planned Leave','Planned Leave'));
+        
+        return options;
+    }    
+    public List<Holiday__c> getHolidays(){
+        List<Holiday__c> holidays= [Select Name,Holiday_Date__c From Holiday__c Order By Holiday_Date__c];
+        return holidays;
+    }
+}
